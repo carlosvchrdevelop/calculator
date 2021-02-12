@@ -1,6 +1,7 @@
 import React from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import CalcButton from './CalcButton';
+import { checkKey, resolve, fixUnclosedParenthesis, getAvaibleKeys } from '../lib/calulator';
 
 const COLS = 4;
 const ROWS = 6;
@@ -18,22 +19,39 @@ const styles = StyleSheet.create({
 const Keypad = ({operation, setOperation, result, setResult, screenProp}) => {
 
     const addValue = (value) => {
-        if(!checkKey(value)) return;
+        if(!checkKey(value, operation)) return;
         switch (value){
             case 'C':
                 setOperation('');
                 break;
             case '←':
                 setOperation((current) => {
-                    return current.substring(0, current.length-1);
+                    if(current.length === 0) return current;
+                    let nchars = 1;
+                    if(current.endsWith('log(')) nchars = 4;
+                    if(current.endsWith('^(')) nchars = 2;
+                    if(current.endsWith('√(')) nchars = 2;
+                    return current.substring(0, current.length-nchars);
                 });
                 break;
             case '=':
-                resolve();
+                let fixOp = fixUnclosedParenthesis(operation);
+                setOperation(fixOp)
+                resolve(fixOp);
                 break;
             case 'lg':
                 setOperation((current) => {
                     return current + 'log(';
+                });
+                break;
+            case '√':
+                setOperation((current) => {
+                    return current + '√(';
+                });
+                break;
+            case '^':
+                setOperation((current) => {
+                    return current + '^(';
                 });
                 break;
             default:
@@ -43,21 +61,16 @@ const Keypad = ({operation, setOperation, result, setResult, screenProp}) => {
         }
     };
 
-    const resolve = () => {
-        // TODO: Termianar resolve function
-    }
+    const keys = ['(',')','lg','C',
+                 '^','√','%','/',
+                 '7','8','9','x',
+                 '4','5','6','-',
+                 '1','2','3','+',
+                 '←','0',',','='];
 
-    const checkKey = (value) => {
-        // TODO: Agregar reglas de validación
-        return true;
-    }
+    const avaibleKeys = getAvaibleKeys(keys, operation);
 
-    const buttons = ['(',')','lg','C',
-                    '^','√','%','/',
-                    '7','8','9','x',
-                    '4','5','6','-',
-                    '1','2','3','+',
-                    '←','0',',','='].map((v) => {
+    const buttons = keys.map((v) => {
                         return (
                             <CalcButton
                                 callback={addValue}
@@ -65,6 +78,7 @@ const Keypad = ({operation, setOperation, result, setResult, screenProp}) => {
                                 key={v} 
                                 value={v}
                                 width={WIDTH}
+                                enabled={avaibleKeys.includes(v)}
                             />
                         );
                     });

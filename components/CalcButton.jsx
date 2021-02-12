@@ -1,9 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableHighlight } from 'react-native';
 
-const styles = (width, height) => StyleSheet.create({
+const styles = (width, height, enabled) => StyleSheet.create({
     btn: {
-        backgroundColor: '#f4f4f4',
+        backgroundColor: enabled ? '#f4f4f4' : '#dbdbdb',
         height: height,
         justifyContent: 'center',
         width: width
@@ -16,14 +16,14 @@ const styles = (width, height) => StyleSheet.create({
 });
 
 
-const CalcButton = ({value, width, height, callback}) => {
+const CalcButton = ({value, width, height, callback, enabled}) => {
     return (
         <TouchableHighlight 
             onPress={() => callback(value)}
-            style={styles(width, height).btn}
+            style={styles(width, height, enabled).btn}
             underlayColor='#78909C'
         >
-            <Text style={styles(width, height).txt}>{value}</Text>
+            <Text style={styles(width, height, enabled).txt}>{value}</Text>
         </TouchableHighlight>
     );
 }
